@@ -42,6 +42,7 @@ if [ -n "$tun0_ip" ]; then
     echo "========================================" | lolcat
     # If tun0 IP is found, print the IP address and start the Python HTTP server
     echo "Hosting on: $tun0_ip" | lolcat
+    cd ~/.HostingFolder
     python -m http.server --bind $tun0_ip 8080 2>/dev/null
 else
     echo "tun0 IP not found Ensure you are connected to a VPN."
