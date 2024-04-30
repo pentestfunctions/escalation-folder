@@ -31,19 +31,18 @@ clear
 # Check if tun0 IP is found
 tun0_ip=$(/sbin/ifconfig tun0 | awk '/inet / {print $2}')
 
-# Print out curl command for each file in ~/.HostingFolder
-echo "========================================" | lolcat
-for file in ~/.HostingFolder/*; do
-    if [ -f "$file" ]; then
-        echo "curl http://$tun0_ip:8080/$(basename "$file")"  | lolcat
-    fi
-done
-echo "========================================" | lolcat
-
 if [ -n "$tun0_ip" ]; then
+# Print out curl command for each file in ~/.HostingFolder
+    echo "========================================" | lolcat
+    for file in ~/.HostingFolder/*; do
+        if [ -f "$file" ]; then
+            echo "curl http://$tun0_ip:8080/$(basename "$file")"  | lolcat
+        fi
+    done
+    echo "========================================" | lolcat
     # If tun0 IP is found, print the IP address and start the Python HTTP server
     echo "Hosting on: $tun0_ip" | lolcat
     python -m http.server --bind $tun0_ip 8080 2>/dev/null
 else
-    echo "tun0 IP not found."
+    echo "tun0 IP not found Ensure you are connected to a VPN."
 fi
